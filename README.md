@@ -26,7 +26,8 @@
 
 # 구현
 #### 1. 회원가입 API
-* bcrypt 단방향으로 pw, 주민번호 암호화 한다.
+* pw: bcrypt 단방향으로 암호화  
+* 주민번호: aes256 암복호화 한다.
 ---
 * Table : users
 * 컬럼 : 아이디 / 주민번호는 unique key 설정

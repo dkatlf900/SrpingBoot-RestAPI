@@ -3,20 +3,60 @@ package com.example.szssonjunyoung.api.szs.service;
 import com.example.szssonjunyoung.api.szs.dto.request.SignReq;
 import com.example.szssonjunyoung.api.szs.entity.Users;
 import com.example.szssonjunyoung.api.szs.repository.SignRepository;
+import com.example.szssonjunyoung.base.util.AES256Util;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 
+
+@Slf4j
 @Service("SignService")
 public class SignService {
 
     @Autowired
     private SignRepository signRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private static final Map<String, String> PERMIT_USERS = new HashMap<>() {{
+        put("홍길동", "860824-1655068");
+        put("김둘리", "921108-1582816");
+        put("마징가", "880601-2455116");
+        put("베지터", "910411-1656116");
+        put("손오공", "820326-2715702");
+    }};
+
+
+    /**
+     * 회원가입
+     */
     public boolean signUser(SignReq signReq) {
-        // TODO 검증로직 들어가야하고 aop로 에러발생시 잡아야 한다.
-        // 회원가입 로직을 구현합니다.
-        signRepository.save(new Users(signReq));
-        return true; // 성공 여부를 반환
+        if (isPermitUser(signReq.getName(), signReq.getRegNo())) {
+            // pw, 주민번호 encode
+            signReq.setPassword(passwordEncoder.encode(signReq.getPassword()));
+            signReq.setRegNo(AES256Util.encryptAES(signReq.getRegNo()));
+
+            // TODO 검증로직 들어가야하고 aop로 에러발생시 잡아야 한다.
+//            signRepository.
+
+            signRepository.save(new Users(signReq));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * 가입 허용회원 검증
+     */
+    private boolean isPermitUser(String name, String regNo) {
+        String permitRegNo = PERMIT_USERS.get(name);
+        return permitRegNo != null && permitRegNo.equals(regNo);
     }
 }
