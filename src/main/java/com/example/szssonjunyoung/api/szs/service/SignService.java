@@ -14,6 +14,7 @@ public class SignService {
     private SignRepository signRepository;
 
     public boolean signUser(SignReq signReq) {
+        // TODO 검증로직 들어가야하고 aop로 에러발생시 잡아야 한다.
         // 회원가입 로직을 구현합니다.
         signRepository.save(new Users(signReq));
         return true; // 성공 여부를 반환
