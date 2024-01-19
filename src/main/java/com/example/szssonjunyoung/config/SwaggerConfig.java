@@ -17,19 +17,19 @@ import java.util.Map;
 public class SwaggerConfig {
 
     // swagger ui접속
-    // http://localhost:8080/swagger-ui/index.html
+    // http://localhost:9000/swagger-ui/index.html
 
     @Bean
     public OpenAPI customOpenAPI() {
-        var authHeader = Map.of("bearAuth",
+        var authHeader = Map.of("bearerAuth",
                 new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT")
                         .in(SecurityScheme.In.HEADER)
-                        .name("access_token"));
+                        .name("Authorization"));
 
-        var schemaRequirement = new SecurityRequirement().addList("bearAuth");
+        var schemaRequirement = new SecurityRequirement().addList("bearerAuth");
 
         return new OpenAPI()
                 .info(new Info()
