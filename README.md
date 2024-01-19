@@ -11,10 +11,10 @@
 * http://localhost:9000/swagger-ui/index.html
 
 ## H2 Embeded DB
-* http://localhost:8080/h2-console
+* http://localhost:9000/h2-console
 * url: jdbc:h2:mem:testdb
 * login: sa
-* pw: test
+* pw: 없음
 
 ---
 
