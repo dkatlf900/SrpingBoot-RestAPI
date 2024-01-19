@@ -78,7 +78,7 @@ public class SzsScrapRes {
                 @JsonInclude(JsonInclude.Include.NON_NULL)
                 private String amount;
 
-                @JsonProperty("총납임금액")
+                @JsonProperty("총납입금액")
                 @JsonInclude(JsonInclude.Include.NON_NULL)
                 private String totalPaymentAmount;
 

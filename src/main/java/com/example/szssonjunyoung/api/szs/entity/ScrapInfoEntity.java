@@ -15,12 +15,14 @@ public class ScrapInfoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scrapInfoId;
 
-//    @OneToMany
     @OneToMany(mappedBy = "scrapInfo", cascade = CascadeType.ALL)
     private List<SalaryEntity> salarys;
 
     @OneToOne(mappedBy = "scrapInfo", cascade = CascadeType.ALL)
     private TaxCalculationEntity taxCalculation;
+
+    @OneToMany(mappedBy ="scrapInfo", cascade = CascadeType.ALL)
+    private List<DeductionEntity> deductionEntities;
 
     @OneToOne
     @JoinColumn(name = "id", nullable = false, unique = true)
