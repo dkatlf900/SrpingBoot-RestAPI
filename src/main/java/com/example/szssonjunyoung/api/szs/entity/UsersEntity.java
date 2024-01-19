@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Table(name = "users")
-public class Users {
+public class UsersEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,11 +28,10 @@ public class Users {
     private String name;
 
 
-
     /**
      * 회원가입
      */
-    public Users(SignReq signReq) {
+    public UsersEntity(SignReq signReq) {
         this.userId = signReq.getUserId();
         this.password = signReq.getPassword();
         this.name = signReq.getName();

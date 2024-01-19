@@ -1,7 +1,7 @@
 package com.example.szssonjunyoung.api.szs.service;
 
 import com.example.szssonjunyoung.api.szs.dto.request.SignReq;
-import com.example.szssonjunyoung.api.szs.entity.Users;
+import com.example.szssonjunyoung.api.szs.entity.UsersEntity;
 import com.example.szssonjunyoung.api.szs.repository.SignRepository;
 import com.example.szssonjunyoung.base.util.AES256Util;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +24,9 @@ public class SignService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * 회원가입 허용된 회원정보
+     */
     private static final Map<String, String> PERMIT_USERS = new HashMap<>() {{
         put("홍길동", "860824-1655068");
         put("김둘리", "921108-1582816");
@@ -42,12 +45,12 @@ public class SignService {
             signReq.setPassword(passwordEncoder.encode(signReq.getPassword()));
             signReq.setRegNo(AES256Util.encryptAES(signReq.getRegNo()));
 
-            Optional<Users> user = signRepository.findByNameAndRegNo(signReq.getName(), signReq.getRegNo());
+            Optional<UsersEntity> user = signRepository.findByNameAndRegNo(signReq.getName(), signReq.getRegNo());
             if (user.isPresent()) {
                 return false;
             }
 
-            signRepository.save(new Users(signReq));
+            signRepository.save(new UsersEntity(signReq));
             return true;
         } else {
             return false;

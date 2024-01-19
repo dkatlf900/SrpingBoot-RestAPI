@@ -38,4 +38,7 @@ server:
 
 jwt:
   secret: jwttestkey1234testjwttestjwttestjwttest
-  expire: 3600
+  expire: 86400 # 1일
+
+szs:
+  scrap-url: https://codetest.3o3.co.kr/v2/scrap

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "회원가입 API", description = "")
+@Tag(name = "1.회원가입 API", description = "")
 @Slf4j
 @RestController
 public class SignController {

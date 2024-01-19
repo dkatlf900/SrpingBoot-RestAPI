@@ -29,7 +29,7 @@
 * pw: bcrypt 단방향으로 암호화  
 * 주민번호: aes256 암복호화 한다.
 ---
-* Table : users
+* Table : usersEntity
 * 컬럼 : 아이디 / 주민번호는 unique key 설정
 
 # 1. 다음의 요건을 만족하는 회원 가입 API를 작성해 주세요

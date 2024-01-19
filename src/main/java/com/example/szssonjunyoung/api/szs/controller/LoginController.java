@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "로그인 API", description = "")
+@Tag(name = "2.로그인 API", description = "")
 @Slf4j
 @RestController
 public class LoginController {

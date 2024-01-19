@@ -1,16 +1,21 @@
 package com.example.szssonjunyoung.core.token;
 
-import com.example.szssonjunyoung.api.szs.entity.Users;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.szssonjunyoung.api.szs.entity.UsersEntity;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -32,9 +37,10 @@ public class JwtTokenProvider {
     /**
      * 로그인 성공시 토큰 발급
      */
-    public TokenInfoRes createLoginToken(Users users) {
-        Claims claims = Jwts.claims().setSubject(users.getUserId());
-        claims.put("name", users.getName());
+    public TokenInfoRes createLoginToken(UsersEntity usersEntity) {
+        Claims claims = Jwts.claims().setSubject(String.valueOf(usersEntity.getId()));
+        claims.put("name", usersEntity.getName());
+        claims.put("userId", usersEntity.getUserId());
         claims.put("roles", "ROLE_USER");
 
         String jwtToken = this.createToken(claims);
@@ -83,6 +89,38 @@ public class JwtTokenProvider {
 
         return claims;
     }
+
+
+    /**
+     * 토큰의 유효성 + 만료일자 확인
+     */
+    public boolean validateToken(String jwtToken) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(this.key)
+                    .requireIssuer("szs")
+                    .build()
+                    .parseClaimsJws(jwtToken);
+            return !claimsJws.getBody().getExpiration().before(new Date());
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.debug(e.toString());
+            e.printStackTrace();
+//            throw new FantooException(ErrorCode.ERROR_AE5103);
+        } catch (ExpiredJwtException e) {
+            log.debug(e.toString());
+//            throw new FantooException(ErrorCode.ERROR_AE5102);
+        } catch (UnsupportedJwtException e) {
+            log.debug(e.toString());
+//            throw new FantooException(ErrorCode.ERROR_AE5103);
+        } catch (IllegalArgumentException e) {
+            log.debug(e.toString());
+//            throw new FantooException(ErrorCode.ERROR_AE5103);
+
+        }
+        // TODO 여기 에러처리 해야하는데 일단 리턴으로하고 나중에 삭제해야한다
+        return false;
+    }
+
 
 
 
@@ -282,33 +320,6 @@ public class JwtTokenProvider {
 */
 
 
-    /**
-     * 토큰의 유효성 + 만료일자 확인
-     */
-    /*public boolean validateToken(String jwtToken) {
-        try {
-            Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .requireIssuer("fantoo")
-                    .build()
-                    .parseClaimsJws(jwtToken);
-            return !claimsJws.getBody().getExpiration().before(new Date());
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.debug(e.toString());
-            e.printStackTrace();
-            throw new FantooException(ErrorCode.ERROR_AE5103);
-        } catch (ExpiredJwtException e) {
-            log.debug(e.toString());
-            throw new FantooException(ErrorCode.ERROR_AE5102);
-        } catch (UnsupportedJwtException e) {
-            log.debug(e.toString());
-            throw new FantooException(ErrorCode.ERROR_AE5103);
-        } catch (IllegalArgumentException e) {
-            log.debug(e.toString());
-            throw new FantooException(ErrorCode.ERROR_AE5103);
-        }
-    }
-*/
 
     /**
      * access_token, sub값 integUid 추출
@@ -359,14 +370,14 @@ public class JwtTokenProvider {
 
 
 
-    /*public Authentication getAuthentication(String token) {
-        Claims claims = this.getClaims(token, key);
+    public Authentication getAuthentication(String token) {
+        Claims claims = this.getClaims(token);
 
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("roles").toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
         return new UsernamePasswordAuthenticationToken(new Account(claims, authorities), token, authorities);
-    }*/
+    }
 
 }

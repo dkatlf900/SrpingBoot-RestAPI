@@ -2,8 +2,10 @@ package com.example.szssonjunyoung.api.szs.dto.response;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 
+@Builder
 @Data
 public class UserInfoRes {
     @Schema(description = "pk", example = "")

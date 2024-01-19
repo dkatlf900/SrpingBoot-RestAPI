@@ -16,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,9 +32,11 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             http
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/swagger-ui/**","/swagger-ui/html/**"
@@ -41,7 +44,7 @@ public class SecurityConfig {
                                 , "/webjars/**","/v3/api-docs/**").permitAll()
                         .requestMatchers("/szs/signup").permitAll() // 회원가입 허용
                         .requestMatchers("/szs/login").permitAll() // 로그인 허용
-                        .requestMatchers("/szs/**").hasRole("USER") // 그외 jwt 검증
+                        .requestMatchers("/szs/**").hasRole("USER") // 그외 jwt 검증, USER권한 필요
                         .anyRequest().authenticated()
                 )
                 .csrf((csrf) -> csrf.disable())
