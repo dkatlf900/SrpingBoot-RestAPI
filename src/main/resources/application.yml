@@ -35,3 +35,7 @@ server:
   servlet:
     session:
       timeout: 50m
+
+jwt:
+  secret: jwttestkey1234testjwttestjwttestjwttest
+  expire: 3600

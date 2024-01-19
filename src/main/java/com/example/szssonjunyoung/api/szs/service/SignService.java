@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Slf4j
@@ -41,8 +42,10 @@ public class SignService {
             signReq.setPassword(passwordEncoder.encode(signReq.getPassword()));
             signReq.setRegNo(AES256Util.encryptAES(signReq.getRegNo()));
 
-            // TODO 검증로직 들어가야하고 aop로 에러발생시 잡아야 한다.
-//            signRepository.
+            Optional<Users> user = signRepository.findByNameAndRegNo(signReq.getName(), signReq.getRegNo());
+            if (user.isPresent()) {
+                return false;
+            }
 
             signRepository.save(new Users(signReq));
             return true;

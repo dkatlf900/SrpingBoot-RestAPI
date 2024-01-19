@@ -26,7 +26,7 @@ public class SignController {
 
 
     @PostMapping("/szs/signup")
-    @Operation(summary = "회원가입 API", description = "* 그 외 다른 기기는 그대로 유지.")
+    @Operation(summary = "회원가입 API", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "SUCCESS", content = @Content(schema = @Schema(implementation = Boolean.class)))
     })

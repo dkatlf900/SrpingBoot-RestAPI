@@ -7,8 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface SignRepository extends JpaRepository<Users, Long> {
+public interface LoginRepository extends JpaRepository<Users, Long> {
 
-    @Query(value = "SELECT * FROM users a WHERE a.name = :name OR a.reg_no = :regNo", nativeQuery = true)
-    Optional<Users> findByNameAndRegNo(@Param("name") String name, @Param("regNo") String regNo);
+    @Query(value = "SELECT * FROM users a WHERE a.user_id = :userId", nativeQuery = true)
+    Optional<Users> findByUserId(@Param("userId") String userId);
 }
