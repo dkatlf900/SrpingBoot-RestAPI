@@ -36,6 +36,12 @@ server:
     session:
       timeout: 50m
 
+spring-doc:
+  swagger-ui:
+    tags-sorter: alpha # tag정렬
+    operations-sorter : method
+    doc-expansion : none #접기
+
 jwt:
   secret: jwttestkey1234testjwttestjwttestjwttest
   expire: 86400 # 1일
