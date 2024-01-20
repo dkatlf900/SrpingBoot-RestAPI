@@ -3,24 +3,24 @@ package com.example.szssonjunyoung.api.szs.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-
-@SuperBuilder
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "tax_calculation")
-public class TaxCalculationEntity {
+@Table(name = "refund")
+public class RefundEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 산출세액
-    private String total;
+    // 결정세액
+    private String determinedTaxAmount;
+
+    // 퇴직연금세액공제
+    private String retirementPensionTaxDeduction;
 
     @OneToOne
     @JoinColumn(name = "scrap_info_id", nullable = false)
     private ScrapInfoEntity scrapInfo;
-
 }

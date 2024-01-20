@@ -1,12 +1,12 @@
 package com.example.szssonjunyoung.api.szs.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+@SuperBuilder
 @Entity
 @Data
 @NoArgsConstructor
@@ -17,12 +17,15 @@ public class DeductionEntity {
     private Long id;
 
     // 금액
+    @Column(nullable = true)
     private String amount;
 
     // 총납입금액
+    @Column(nullable = true)
     private String totalPaymentAmount;
 
     // 소득구분
+    @Column(nullable = false)
     private String amoutType;
 
     @ManyToOne

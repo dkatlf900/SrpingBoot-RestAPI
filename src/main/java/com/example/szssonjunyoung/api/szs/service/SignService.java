@@ -45,6 +45,7 @@ public class SignService {
             signReq.setPassword(passwordEncoder.encode(signReq.getPassword()));
             signReq.setRegNo(AES256Util.encryptAES(signReq.getRegNo()));
 
+            // TODO 가입시 아이디 중복체크 해야한다.
             Optional<UsersEntity> user = signRepository.findByNameAndRegNo(signReq.getName(), signReq.getRegNo());
             if (user.isPresent()) {
                 return false;

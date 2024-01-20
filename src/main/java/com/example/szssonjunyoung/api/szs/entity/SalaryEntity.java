@@ -1,9 +1,12 @@
 package com.example.szssonjunyoung.api.szs.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+@SuperBuilder
 @Entity
 @Data
 @NoArgsConstructor

@@ -24,9 +24,17 @@ public class ScrapInfoEntity {
     @OneToMany(mappedBy ="scrapInfo", cascade = CascadeType.ALL)
     private List<DeductionEntity> deductionEntities;
 
-    @OneToOne
-    @JoinColumn(name = "id", nullable = false, unique = true)
+    @OneToOne(mappedBy = "scrapInfo", cascade = CascadeType.ALL)
+    private RefundEntity refund;
+
+    /*@OneToOne
+    @JoinColumn(name = "id", nullable = false)
+    private UsersEntity user;*/
+
+    @ManyToOne
+    @JoinColumn(name = "id", nullable = false)
     private UsersEntity user;
+
 
     // 스크랩 정보의 필드 추가
     private String appVer;
