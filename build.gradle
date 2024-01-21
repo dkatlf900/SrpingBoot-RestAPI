@@ -61,6 +61,14 @@ dependencies {
 	 */
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'io.netty:netty-resolver-dns-native-macos:4.1.90.Final:osx-aarch_64'
+
+    /**
+     * junit
+     */
+    // https://mvnrepository.com/artifact/junit/junit
+    testImplementation 'junit:junit:4.13.2'
+
+
 }
 
 tasks.named('test') {

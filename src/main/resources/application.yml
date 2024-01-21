@@ -24,19 +24,6 @@ spring:
       fallback-to-system-locale: false
 
 
-#  main:
-#    allow-bean-definition-overriding: true
-#  servlet:
-#    multipart:
-#      max-file-size: 100MB
-#      max-request-size: 100MB
-#  mvc: #Swagger
-#    pathmatch:
-#      matching-strategy: ANT_PATH_MATCHER # STS > ??? ? (ant_path_matcher), problems > error ???, ??? ???? ???? > ?? ???
-#    view:
-#      suffix: .html
-#      prefix: /
-
 server:
   port: 9000
   servlet:
@@ -51,7 +38,9 @@ spring-doc:
 
 jwt:
   secret: jwttestkey1234testjwttestjwttestjwttest
-  expire: 86400 # 1일
+#  expire: 86400 # 1일
+  expire: 31536000 # 1년 (365일)
+
 
 szs:
   scrap-url: https://codetest.3o3.co.kr/v2/scrap
