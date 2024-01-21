@@ -6,6 +6,8 @@ import com.example.szssonjunyoung.api.szs.entity.*;
 import com.example.szssonjunyoung.api.szs.repository.ScrapInfoRepository;
 import com.example.szssonjunyoung.api.szs.repository.UserRepository;
 import com.example.szssonjunyoung.base.util.AES256Util;
+import com.example.szssonjunyoung.core.aop.exception.ErrorCode;
+import com.example.szssonjunyoung.core.aop.exception.custom.SzsException;
 import com.example.szssonjunyoung.core.token.Account;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.util.retry.Retry;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,9 @@ public class UserService {
     private ScrapInfoRepository scrapInfoRepository;
 
     @Autowired
+    private RefundService refundService;
+
+    @Autowired
     private WebClient webClient;
 
     @Value("${szs.scrap-url}")
@@ -41,7 +45,7 @@ public class UserService {
 
 
     public UserInfoRes userInfo(Account account) {
-        // 여기서 Pk로 DB조회하여 정보 담아서 보내주기만 하면된다.
+        // 토큰에 해당하는 회원정보 조회
         Optional<UsersEntity> user = userRepository.findById(Long.valueOf(account.getId()));
         if(user.isPresent()) {
             return UserInfoRes.builder()
@@ -51,12 +55,14 @@ public class UserService {
                     .regNo(AES256Util.decryptAES(user.get().getRegNo()))
                     .build();
         } else {
-            // TODO 만약 혹시나 회원이 없다면?
-            return null;
+            throw new SzsException(ErrorCode.ERROR_SZSE1004);
         }
     }
 
 
+    /**
+     * 회원정보 스크랩API 호출 및 환급금액 계산
+     */
     @Transactional
     public SzsScrapRes userInfoScrap(Account account) {
         Optional<UsersEntity> userOptional = userRepository.findById(Long.valueOf(account.getId()));
@@ -67,27 +73,28 @@ public class UserService {
             requestBody.put("name", user.getName());
             requestBody.put("regNo", AES256Util.decryptAES(user.getRegNo()));
 
-            // TODO 일단 필요한 정보들을 Db에 저장해야 한다. 또한 장애발생시 처리도 필요.
+            // 스크랩 Info 호출 및 저장
             SzsScrapRes response = webClient.post()
                     .uri(scrapUrl)
                     .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(SzsScrapRes.class)
-                    .timeout(Duration.ofSeconds(40)) // 최대 40초 대기
+                    .timeout(Duration.ofSeconds(30)) // 최대 30초 대기
                     .retryWhen(Retry.backoff(1, Duration.ofSeconds(1))) // 실패시 backoff 1회 재호출
                     .doOnError(e -> {
                         // 에러 처리 로직 추가
 //                        e.printStackTrace();
+                        throw new SzsException(ErrorCode.ERROR_SZSE1005);
                     })
                     .block();
-            // TODO response 로 데이터 저장해야한다.
+
             if (response != null) {
                 saveScrapInfo(user, response);
             }
-
             return response;
+        } else {
+            throw new SzsException(ErrorCode.ERROR_SZSE1004);
         }
-        return null;
     }
 
 
@@ -123,7 +130,7 @@ public class UserService {
 
 
         // RefundEntity 저장
-        RefundEntity refundEntity = calculateRefund(scrapInfoEntity);
+        RefundEntity refundEntity = refundService.calculateRefund(scrapInfoEntity);
         scrapInfoEntity.setRefund(refundEntity);
     }
 
@@ -169,151 +176,5 @@ public class UserService {
                 .total(jsonList.getTotal())
                 .build();
     }
-
-
-    /**
-     * 결정세액 info
-     */
-    private RefundEntity calculateRefund(ScrapInfoEntity scrapInfoEntity) {
-        RefundEntity refundEntity = new RefundEntity();
-        TaxCalculationEntity taxCalculationEntity = scrapInfoEntity.getTaxCalculation();
-
-        // 산출세액
-        BigDecimal determinedTaxAmount = new BigDecimal(taxCalculationEntity.getTotal().replace(",", ""));
-
-        // 1. 근로소득세액공제금액
-        BigDecimal incomeTaxDeduction = determinedTaxAmount.multiply(new BigDecimal("0.55"));
-
-        // 2. 퇴직연금세액공제금액
-        BigDecimal retirementPensionTaxDeduction = calculateRetirementPensionTaxDeduction(scrapInfoEntity);
-
-        // 3. 특별세액공제금액
-        BigDecimal specialDeductionAmount = calculateSpecialDeduction(scrapInfoEntity);
-
-        // 4. 표준세액공제금액
-        BigDecimal standardDeductionAmount = calculateStandardDeduction(specialDeductionAmount);
-
-
-        // 결정세액 계산: 결정세액 = 산출세액 - 근로소득세액공제금액 - 퇴직연금세액공제금액 - 특별세액공제금액 - 표준세액공제금액
-        BigDecimal result = determinedTaxAmount.subtract(incomeTaxDeduction)
-                .subtract(retirementPensionTaxDeduction)
-                .subtract(specialDeductionAmount)
-                .subtract(standardDeductionAmount);
-
-        // 결정세액이 음수인 경우 0으로 처리
-        result = result.max(BigDecimal.ZERO);
-
-        // 계산 결과를 엔티티에 저장
-        refundEntity.setDeterminedTaxAmount(result.toString());
-        refundEntity.setRetirementPensionTaxDeduction(retirementPensionTaxDeduction.toString());
-
-        // RefundEntity를 저장
-        return refundEntity;
-    }
-
-    private BigDecimal calculateRetirementPensionTaxDeduction(ScrapInfoEntity scrapInfoEntity) {
-        // 퇴직연금세액공제금액 = 퇴직연금 납입금액 * 0.15
-        BigDecimal totalPaymentAmount = scrapInfoEntity.getDeductionEntities().stream()
-                .filter(deductionEntity -> "퇴직연금".equals(deductionEntity.getAmoutType()))
-                .map(deductionEntity -> new BigDecimal(deductionEntity.getTotalPaymentAmount().replace(",", "")))
-                .findFirst()
-                .orElse(BigDecimal.ZERO);
-
-        return totalPaymentAmount.multiply(new BigDecimal("0.15"));
-    }
-
-
-    /**
-     * 특별세액공제금액
-     */
-    private BigDecimal calculateSpecialDeduction(ScrapInfoEntity scrapInfoEntity) {
-        List<DeductionEntity> deductionEntities = scrapInfoEntity.getDeductionEntities();
-
-        // 보험료, 의료비, 교육비, 기부금에 대한 특별세액공제 계산
-        BigDecimal insuranceDeduction = calculateInsuranceDeduction(deductionEntities); // 보험료
-        BigDecimal medicalExpensesDeduction = calculateMedicalExpensesDeduction(scrapInfoEntity); // 의료비
-        BigDecimal educationExpensesDeduction = calculateEducationExpensesDeduction(deductionEntities); // 교육비
-        BigDecimal donationDeduction = calculateDonationDeduction(deductionEntities); // 기부금
-
-        // 계산된 특별세액공제금액의 4개 합
-        return insuranceDeduction
-                .add(medicalExpensesDeduction)
-                .add(educationExpensesDeduction)
-                .add(donationDeduction);
-    }
-
-
-
-    /**
-     * 표준세액공제금액을 계산하는 메서드
-     */
-    private BigDecimal calculateStandardDeduction(BigDecimal specialDeductionAmount) {
-        // 표준세액공제금액: 특별세액공제금액의 합이 130,000원 미만일 경우 130,000원, 그 이상일 경우 0원
-        return specialDeductionAmount.compareTo(new BigDecimal("130000")) < 0 ?
-                new BigDecimal("130000") : BigDecimal.ZERO;
-    }
-
-
-    /**
-     * 보험료공제금액을 계산하는 메서드
-     */
-    private BigDecimal calculateInsuranceDeduction(List<DeductionEntity> deductionEntities) {
-        // 보험료공제금액 = 보험료납입금액 * 12%
-        return deductionEntities.stream()
-                .filter(deductionEntity -> "보험료".equals(deductionEntity.getAmoutType()))
-                .map(deductionEntity -> new BigDecimal(deductionEntity.getAmount().replace(",", ""))
-                        .multiply(new BigDecimal("0.12")))
-                .findFirst()
-                .orElse(BigDecimal.ZERO);
-    }
-
-
-
-    /**
-     * 의료비공제금액
-     * 의료비공제금액 = (의료비납입금액 - 총급여 * 3%) * 15%
-     * 단, 의료비공제금액 < 0 일 경우, 의료비공제금액 = 0 처리 한다.
-     */
-    private BigDecimal calculateMedicalExpensesDeduction(ScrapInfoEntity scrapInfoEntity) {
-        BigDecimal totalPayment = new BigDecimal(scrapInfoEntity.getSalarys().get(0).getTotalPaymentAmount().replace(",", ""));
-        BigDecimal medicalExpenses = new BigDecimal(scrapInfoEntity.getDeductionEntities().stream()
-                .filter(deductionEntity -> "의료비".equals(deductionEntity.getAmoutType()))
-                .map(deductionEntity -> deductionEntity.getAmount().replace(",", ""))
-                .findFirst()
-                .orElse("0"));
-
-        BigDecimal medicalExpensesDeduction = medicalExpenses.subtract(totalPayment.multiply(new BigDecimal("0.03")))
-                .multiply(new BigDecimal("0.15"));
-
-        // 의료비공제금액이 음수인 경우 0으로 처리
-        return medicalExpensesDeduction.max(BigDecimal.ZERO);
-    }
-
-    /**
-     * 교육비공제금액
-     */
-    private BigDecimal calculateEducationExpensesDeduction(List<DeductionEntity> deductionEntities) {
-        // 교육비공제금액 = 교육비납입금액 * 15%
-        return deductionEntities.stream()
-                .filter(deductionEntity -> "교육비".equals(deductionEntity.getAmoutType()))
-                .map(deductionEntity -> new BigDecimal(deductionEntity.getAmount().replace(",", ""))
-                        .multiply(new BigDecimal("0.15")))
-                .findFirst()
-                .orElse(BigDecimal.ZERO);
-    }
-
-    /**
-     * 기부금공제금액
-     */
-    private BigDecimal calculateDonationDeduction(List<DeductionEntity> deductionEntities) {
-        // 기부금공제금액 = 기부금납입금액 * 15%
-        return deductionEntities.stream()
-                .filter(deductionEntity -> "기부금".equals(deductionEntity.getAmoutType()))
-                .map(deductionEntity -> new BigDecimal(deductionEntity.getAmount().replace(",", ""))
-                        .multiply(new BigDecimal("0.15")))
-                .findFirst()
-                .orElse(BigDecimal.ZERO);
-    }
-
 
 }

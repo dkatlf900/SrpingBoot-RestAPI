@@ -1,7 +1,6 @@
 package com.example.szssonjunyoung.api.szs.controller;
 
 
-import com.example.szssonjunyoung.api.szs.dto.response.RefundRes;
 import com.example.szssonjunyoung.api.szs.dto.response.SzsScrapRes;
 import com.example.szssonjunyoung.api.szs.dto.response.UserInfoRes;
 import com.example.szssonjunyoung.api.szs.service.UserService;
@@ -29,7 +28,7 @@ public class UserInfoController {
     private UserService userService;
 
     @GetMapping("/szs/me")
-    @Operation(summary = "MY 회원정보 API", description = "")
+    @Operation(summary = "1.My 회원정보 API | (jwt token필수)" , description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "SUCCESS", content = @Content(schema = @Schema(implementation = UserInfoRes.class)))
     })
@@ -39,7 +38,7 @@ public class UserInfoController {
 
 
     @PostMapping("/szs/scrap")
-    @Operation(summary = "회원정보 Scrap API", description = "")
+    @Operation(summary = "2.My 회원정보 Scrap API | (jwt token필수)", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "SUCCESS", content = @Content(schema = @Schema(implementation = SzsScrapRes.class)))
     })
@@ -48,12 +47,4 @@ public class UserInfoController {
     }
 
 
-    @GetMapping("/szs/refund")
-    @Operation(summary = "MY 세액금액 API", description = "")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "SUCCESS", content = @Content(schema = @Schema(implementation = RefundRes.class)))
-    })
-    public GeneralResponse<RefundRes> userRefund(@AuthenticationPrincipal Account account) {
-        return new GeneralResponse<>();
-    }
 }

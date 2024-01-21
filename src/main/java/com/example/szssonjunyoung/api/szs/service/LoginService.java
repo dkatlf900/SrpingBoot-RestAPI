@@ -3,6 +3,8 @@ package com.example.szssonjunyoung.api.szs.service;
 import com.example.szssonjunyoung.api.szs.dto.request.LoginReq;
 import com.example.szssonjunyoung.api.szs.entity.UsersEntity;
 import com.example.szssonjunyoung.api.szs.repository.LoginRepository;
+import com.example.szssonjunyoung.core.aop.exception.ErrorCode;
+import com.example.szssonjunyoung.core.aop.exception.custom.SzsException;
 import com.example.szssonjunyoung.core.token.JwtTokenProvider;
 import com.example.szssonjunyoung.core.token.TokenInfoRes;
 import lombok.extern.slf4j.Slf4j;
@@ -26,16 +28,14 @@ public class LoginService {
     private JwtTokenProvider jwtTokenProvider;
 
     public TokenInfoRes login(LoginReq loginReq) {
-        // TODO 회원정보 있는지 체크
-        // TODO 있으면 비밀번호 체크
+        // 아이디, 비번 체크
         Optional<UsersEntity> user = loginRepository.findByUserId(loginReq.getUserId());
         if(user.isPresent() && passwordEncoder.matches(loginReq.getPassword(), user.get().getPassword())) {
-            // TODO 로그인 성공시 토큰 발급
+            // 로그인 성공시 토큰 발급
             TokenInfoRes tokenInfoRes = jwtTokenProvider.createLoginToken(user.get());
             return tokenInfoRes;
         } else {
-            // 실패
-            throw new RuntimeException();
+            throw new SzsException(ErrorCode.ERROR_SZSE1003);
         }
     }
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -15,10 +17,10 @@ public class RefundEntity {
     private Long id;
 
     // 결정세액
-    private String determinedTaxAmount;
+    private BigDecimal determinedTaxAmount;
 
     // 퇴직연금세액공제
-    private String retirementPensionTaxDeduction;
+    private BigDecimal retirementPensionTaxDeduction;
 
     @OneToOne
     @JoinColumn(name = "scrap_info_id", nullable = false)

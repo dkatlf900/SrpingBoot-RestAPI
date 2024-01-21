@@ -27,7 +27,9 @@ public class LoginController {
     private LoginService loginService;
 
     @PostMapping("/szs/login")
-    @Operation(summary = "로그인 API", description = "")
+    @Operation(summary = "로그인 API", description = "" +
+            "* 로그인 성공시 토큰발급 \n" +
+            "* ID 또는 PW 불일치시 로그인 실패 - \"code\": \"SZSE1003\" ")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "SUCCESS", content = @Content(schema = @Schema(implementation = TokenInfoRes.class)))
     })

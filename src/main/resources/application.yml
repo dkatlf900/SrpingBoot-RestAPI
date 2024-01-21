@@ -17,6 +17,13 @@ spring:
       properties:
         hibernate:
           format_sql: true
+    messages:
+      basename: i18n/error
+      encoding: UTF-8
+      cache-duration: -1
+      fallback-to-system-locale: false
+
+
 #  main:
 #    allow-bean-definition-overriding: true
 #  servlet:
