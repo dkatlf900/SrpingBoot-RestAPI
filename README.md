@@ -14,7 +14,8 @@
 * http://localhost:9000/h2-console
 * url: jdbc:h2:mem:testdb
 * login: sa
-* pw: 없음
+* pw:
+
 ![img.png](docs/db_img.png)
 
 ---
