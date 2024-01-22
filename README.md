@@ -1,5 +1,6 @@
 ## 스펙
 * Spring Boot 3.2.1
+* Spring Security
 * java 17
 * JPA, H2
 * Gradle
