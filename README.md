@@ -36,13 +36,15 @@
 
 ![img.png](docs/img.png)
 
+![img_1.png](docs/res_img_1.png)
+
 #
 #
 #### 2. 로그인 API : /szs/login
 * Bcrypt로 입력받은 pw검증
 * 로그인 성공시 USER 권한의 JWT Token 발급 (유효시간 1일)
 ![img.png](docs/img2.png)
-
+![img_2.png](docs/res_img_2.png)
 
 #
 #
@@ -51,7 +53,7 @@
 * JwtAuthenticationFilter를 통해 토큰 검증 및 인증
 * 토큰 검증 실패시 "HTTP 401 : Unauthorized" 발생
 ![img.png](docs/img3.png)
-
+![img_3.png](docs/res_img_3.png)
 
 
 #
@@ -62,7 +64,7 @@
 * 제공받은 스크랩API 외부url 호출하여 정보 저장
 * 스크랩정보 저장과 동시에 환급금액 계산하여 Table: refund 저장. 
 ![img.png](docs/img4.png)
-
+![img_4.png](docs/res_img_4.png)
 
 
 #
@@ -73,4 +75,4 @@
 * 스크랩API를 조회할때 환급액은 계산하여 DB저장 하였기에 금액 조회만 진행
 ![img.png](docs/img5.png)
 
-
+![img.png](docs/res_img5.png)
