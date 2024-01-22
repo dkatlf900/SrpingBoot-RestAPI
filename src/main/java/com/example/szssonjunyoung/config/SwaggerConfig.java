@@ -34,7 +34,7 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("삼쩜삼-손준영 API")
-                        .description("<hr/><b>24/01/17, Rest API과제 <br/>")
+                        .description("<hr/><b>24/01/17 ~ 24/01/24, Rest API과제 <br/>")
                         .version("v1"))
                 .components(new Components().securitySchemes(authHeader))
                 .security(List.of(schemaRequirement));
