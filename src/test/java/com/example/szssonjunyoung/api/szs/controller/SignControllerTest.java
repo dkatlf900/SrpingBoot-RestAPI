@@ -5,6 +5,7 @@ import com.example.szssonjunyoung.api.szs.dto.request.SignReq;
 import com.example.szssonjunyoung.api.szs.repository.SignRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -24,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("회원 가입 및 로그인")
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class SignControllerTest {
 
     @Autowired
@@ -38,9 +41,17 @@ class SignControllerTest {
     // 1년짜리 테스트토큰
     private String jwtToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6Iu2Zjeq4uOuPmSIsInVzZXJJZCI6ImhvbmcxMjMiLCJyb2xlcyI6IlJPTEVfVVNFUiIsImlzcyI6InN6cyIsImlhdCI6MTcwNTg1MjkzMiwiZXhwIjoxNzM3Mzg4OTMyfQ.AiuC74XXVb1aY-BhInSpa7uSIEGhjLXfelGNJnNMrWw";
 
+    @AfterAll
+    static void cleanUp(@Autowired SignRepository signRepository) {
+        // 테스트 끝나면 삭제
+        signRepository.deleteAll();
+    }
+
+
     @DisplayName("1.회원 가입")
     @Order(1)
     @Test
+    @Rollback(value = false)
     public void userSign() throws Exception {
         // 테스트에 사용할 회원가입 정보
         SignReq signReq = new SignReq();
